@@ -1,4 +1,3 @@
-// scraper.js
 const axios = require("axios");
 const cheerio = require("cheerio");
 const pLimit = require("p-limit");
@@ -58,7 +57,6 @@ async function fetchDetailBerita(idOrUrl) {
   const $ = cheerio.load(html);
   const card = $("main .card").first();
 
-  // Ambil badge kategori, author, waktu
   const kategori = card.find("span.badge.badge-danger").text().trim() || null;
   const author = card.find("span.badge.badge-warning").text().trim() || null;
   const waktu = card.find("span.badge.badge-info").text().trim() || null;
@@ -67,7 +65,7 @@ async function fetchDetailBerita(idOrUrl) {
   let content = [];
   card.find(".card-body > p").each((_, el) => {
     const p = $(el);
-    if (p.find("span.badge").length) return; // skip badge line
+    if (p.find("span.badge").length) return;
     if (p.hasClass("text-center")) {
       // di dalam text-center bisa ada <p> terpisah
       p.find("p").each((_, pp) => {

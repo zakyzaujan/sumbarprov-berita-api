@@ -1,5 +1,5 @@
-// server.js
 const express = require("express");
+const cors = require("cors");
 const {
   fetchBerita,
   getAllBeritaCached,
@@ -8,6 +8,11 @@ const {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+app.use(cors());
+
+app.get("/", (req, res) => {
+  res.send("Cek API Berita di /api/berita.");
+});
 
 /**
  * Daftar Berita:
