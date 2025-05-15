@@ -1,10 +1,6 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const pLimit = require("p-limit");
-const NodeCache = require("node-cache");
 
-// Cache TTL 1 jam
-const cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 const BASE_URL = "https://sumbarprov.go.id/home/index-berita";
 
 /**
@@ -12,9 +8,11 @@ const BASE_URL = "https://sumbarprov.go.id/home/index-berita";
  */
 async function fetchBerita(page = 1) {
   const url = page === 1 ? BASE_URL : `${BASE_URL}/${(page - 1) * 5}`;
+
   const { data: html } = await axios.get(url, {
     headers: { "User-Agent": "Node.js Scraper" },
   });
+
   const $ = cheerio.load(html);
   const items = [];
 
@@ -25,6 +23,8 @@ async function fetchBerita(page = 1) {
     const thumbnail = el.find("img").attr("src");
     const detailUrl = el.find("a.btn-outline-primary").attr("href");
     const metaText = el.find("p").last().text().trim();
+
+    // Split metaText like "oleh : Nama, 01 Jan 2025 WIB"
     const [, rest] = metaText.split("oleh :");
     const [authorPart, ...dateParts] = rest.split(",");
     const published = dateParts.join(",").replace("WIB", "").trim();
@@ -54,6 +54,7 @@ async function fetchDetailBerita(idOrUrl) {
   const { data: html } = await axios.get(url, {
     headers: { "User-Agent": "Node.js Scraper" },
   });
+
   const $ = cheerio.load(html);
   const card = $("main .card").first();
 
@@ -61,13 +62,12 @@ async function fetchDetailBerita(idOrUrl) {
   const author = card.find("span.badge.badge-warning").text().trim() || null;
   const waktu = card.find("span.badge.badge-info").text().trim() || null;
 
-  // Ambil konten : semua <p> di dalam .card-body, kecuali yang mengandung badge
-  let content = [];
+  // Ambil konten paragraf, kecuali badge dan teks center
+  const content = [];
   card.find(".card-body > p").each((_, el) => {
     const p = $(el);
     if (p.find("span.badge").length) return;
     if (p.hasClass("text-center")) {
-      // di dalam text-center bisa ada <p> terpisah
       p.find("p").each((_, pp) => {
         const txt = $(pp).text().trim();
         if (txt) content.push(txt);
@@ -78,7 +78,7 @@ async function fetchDetailBerita(idOrUrl) {
     }
   });
 
-  // Ambil jumlah views
+  // Ambil jumlah views (angka di footer)
   const viewsText = card.find(".card-footer").text().trim();
   const viewsMatch = viewsText.match(/\d+/);
   const views = viewsMatch ? parseInt(viewsMatch[0], 10) : null;
@@ -95,36 +95,4 @@ async function fetchDetailBerita(idOrUrl) {
   };
 }
 
-/**
- * Baca total halaman secara dinamis.
- */
-async function getTotalPages() {
-  const { data: html } = await axios.get(BASE_URL, {
-    headers: { "User-Agent": "Node.js Scraper" },
-  });
-  const $ = cheerio.load(html);
-  const pages = $("ul.pagination a[data-ci-pagination-page]")
-    .map((_, a) => parseInt($(a).data("ci-pagination-page")))
-    .get()
-    .filter((n) => !isNaN(n));
-  return pages.length ? Math.max(...pages) : 1;
-}
-
-/**
- * Ambil semua berita dengan concurrency terbatas & cache.
- */
-async function getAllBeritaCached(maxConcurrency = 3) {
-  const key = "allBerita";
-  if (cache.has(key)) return cache.get(key);
-  const totalPages = await getTotalPages();
-  const limit = pLimit(maxConcurrency);
-  const tasks = [];
-  for (let i = 1; i <= totalPages; i++) {
-    tasks.push(limit(() => fetchBerita(i).catch(() => [])));
-  }
-  const data = (await Promise.all(tasks)).flat();
-  cache.set(key, data);
-  return data;
-}
-
-module.exports = { fetchBerita, getAllBeritaCached, fetchDetailBerita };
+module.exports = { fetchBerita, fetchDetailBerita };
