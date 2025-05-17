@@ -1,6 +1,21 @@
 
 ---
 
+## Cara Menjalankan
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+2. Jalankan server:
+
+   ```bash
+   node server.js
+   ```
+
+---
+
 ## Base URL
 
 ```
@@ -9,7 +24,7 @@ http://localhost:5000
 
 ---
 
-### 1. Daftar Berita (Paginated)
+### 1. Daftar Berita
 
 ```
 GET /api/berita
@@ -20,22 +35,13 @@ GET /api/berita
 * `page` (integer, optional)
   Halaman yang ingin diambil. Default = `1`.
 
-* `all` (string, optional)
-  Jika diberi nilai `"true"`, maka akan mengembalikan **seluruh** item berita sekaligus (cached). Tanpa `all` atau `all=false`, API akan mengabaikan `page` dan melakukan paginasi normal.
-
 #### Contoh Request
 
 ```
 GET http://localhost:5000/api/berita?page=2
 ```
 
-atau
-
-```
-GET http://localhost:5000/api/berita?all=true
-```
-
-#### Contoh Response (paginated)
+#### Contoh Response
 
 ```json
 {
@@ -49,20 +55,9 @@ GET http://localhost:5000/api/berita?all=true
       "thumbnail": "https://sumbarprov.go.id/images/…",
       "detail_url": "https://sumbarprov.go.id/home/news/23592-…",
       "author": "Nama Penulis",
-      "published": "12 Mei 2025 10:15:30"
+      "published": "11 Januari 2025 11:11:11"
     },
     …
-  ]
-}
-```
-
-#### Contoh Response (all=true)
-
-```json
-{
-  "total": 4387,
-  "data": [
-    /* array semua berita */
   ]
 }
 ```
@@ -76,32 +71,32 @@ GET /api/berita/:id
 ```
 
 * `:id`
-  Identifier berita—bisa berupa slug lengkap (`23597-sumbar-siap-…`) atau hanya angka (`23597`).
+  Identifier berita—bisa berupa slug lengkap (`23456-lorem-ipsum-…`) atau hanya angka (`23456`).
 
 #### Contoh Request
 
 ```
-GET http://localhost:5000/api/berita/23597
+GET http://localhost:5000/api/berita/23456
 ```
 
 #### Contoh Response
 
 ```json
 {
-  "id": "23597",
-  "title": "Sumbar Siap Ukir Sejarah: 808 Pupuik Sarunai …",
-  "img": "https://sumbarprov.go.id/images/2025/05/IMG-20250510-WA0015.jpg",
+  "id": "23456",
+  "title": "23456 - What is Lorem Ipsum? …",
+  "img": "https://sumbarprov.go.id/images/ …",
   "kategori": "Berita Utama",
-  "author": "Satria Oki Sanjaya, S.I.Kom.(DINAS KOMUNIKASI, …)",
-  "waktu": "10 Mei 2025 14:42:04 WIB",
+  "author": "Lorem Ipsum",
+  "waktu": "11 Januari 2025 11:11:11 WIB",
   "content": [
-    "Padang - Sumatera Barat (Sumbar) tengah bersiap …",
-    "Hal tersebut disampaikan Kepala Dinas Pemuda dan …",
-    "“Pupuik sarunai ini alat musik tiup tradisional …”",
+    "Lorem Ipsum is simply dummy text of the printing and typesetting industry …",
+    "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s …",
+    "when an unknown printer took a galley of type and scrambled it to make a type specimen book …",
     "…",
-    "Even Bhinneka Festival Sumbar Tageh 2025 diharapkan …"
+    "and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum …"
   ],
-  "views": 86
+  "views": 11
 }
 ```
 
@@ -125,18 +120,3 @@ GET http://localhost:5000/api/berita/23597
 
 ---
 
-## Cara Menjalankan
-
-1. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-2. Jalankan server:
-
-   ```bash
-   node server.js
-   ```
-3. Akses API seperti contoh di atas.
-
----
